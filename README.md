@@ -10,7 +10,7 @@ There is a growing gap between "can write code" and "can operate as a software e
 
 - **Organization model** — A generated company with teams, cross-team dependencies, and a living codebase. Your teammates have branches in flight, opinions about architecture, and work that interacts with yours.
 - **Dynamic team generation** — Teams are assembled from behavioral archetypes and customized to your project's domain. Each teammate has a name, role, expertise, communication style, and opinions — all generated to fit your codebase.
-- **Flat agent architecture** — Each teammate is a dedicated Claude Code subagent invoked directly from your session. Your CLAUDE.md context makes the session aware of the full team — talk to anyone with `@"persona-name"`.
+- **Flat agent architecture** — Each teammate is a dedicated Claude Code agent invoked directly from your session. Start a conversation with `claude --agent persona-slug`, or type `@` in any session and select from the list.
 - **Persona archetypes** — 10 built-in archetypes (The Mentor, The Gatekeeper, The Pragmatist, and more) that define how teammates think, communicate, and review code.
 - **Beads (work units)** — Scoped, dependency-aware tasks assigned like real engineering work. Deliberately incomplete, just like real tickets — you'll need to explore the codebase and ask questions.
 - **Code review** — Submit your branch for review and receive substantive, contextual feedback from teammates who read your actual diff and respond in character.
@@ -37,10 +37,17 @@ bunx atelier scaffold
 
 `atelier init` analyzes your repository (language, framework, structure, tests, build system), generates an `.atelier/` directory with your organization, teams, personas, and bead backlog, then installs CLAUDE.md context and agent frontmatter files into `.claude/`.
 
-Once initialized, open Claude Code. Your CLAUDE.md context makes the session aware of the team — every persona is available as a direct subagent:
+Once initialized, open Claude Code. Your CLAUDE.md context makes the session aware of the team — every persona is available as an agent:
+
+```bash
+# Start a DM session with a teammate
+claude --agent marcus-chen
+
+# Or in any session, type @ and select from the list
+```
 
 ```
-You: @"Marcus Chen" Hey Marcus, I'm picking up the rate limiting bead.
+You: Hey Marcus, I'm picking up the rate limiting bead.
      What's the current state of the public API endpoints?
 
 [Marcus Chen — Tech Lead] Good timing. Aisha just landed the auth
@@ -51,12 +58,6 @@ chaining in the auth layer and follow that pattern.
 
 [Marcus Chen] I've got opinions about token bucket vs sliding window
 if you want to talk through the trade-offs.
-
-You: @"Aisha Patel" Aisha, can I see how the auth middleware hooks in?
-     I want to follow the same pattern for rate limiting.
-
-[Aisha Patel — Senior Engineer] Sure! Check out src/middleware/auth.ts,
-specifically the `createAuthChain()` factory. The pattern is...
 ```
 
 ## Architecture
@@ -69,13 +70,13 @@ Atelier uses a flat agent architecture where your Claude Code session is the orc
 │           (CLAUDE.md team context loaded)             │
 │                                                      │
 │  ┌────────────┐ ┌────────────┐ ┌────────────┐       │
-│  │ @"Marcus   │ │ @"Aisha    │ │ @"Jordan   │  ...  │
-│  │  Chen"     │ │  Patel"    │ │  Kim"      │       │
+│  │ marcus-    │ │ aisha-     │ │ jordan-    │  ...  │
+│  │ chen       │ │ patel      │ │ kim        │       │
 │  │ (Tech Lead)│ │ (Senior)   │ │ (Junior)   │       │
 │  └─────┬──────┘ └─────┬──────┘ └─────┬──────┘       │
 │        │               │              │              │
 │  ┌─────┴───────────────┴──────────────┴──────┐       │
-│  │          @"atelier-review"                │       │
+│  │          atelier-review                   │       │
 │  │     Cross-team code review workflow       │       │
 │  └───────────────────┬───────────────────────┘       │
 │                      │                               │
@@ -105,8 +106,9 @@ No separate API calls or costs beyond your Claude Code subscription. Every inter
 
 | Channel | How | Description |
 |---|---|---|
-| Direct message | `@"persona-name"` | DM any teammate for focused 1:1 discussion |
-| Code review | `@"atelier-review"` | Submit work for review or review a teammate's branch |
+| Direct message | `claude --agent persona-slug` | Start a 1:1 DM session with any teammate |
+| Code review | `claude --agent atelier-review` | Submit work for review or review a teammate's branch |
+| In-session mention | Type `@` and select | Invoke any agent from within an existing session |
 | Team input | Ask the main session | "What does the team think about X?" — the session delegates to relevant personas |
 
 The main session's CLAUDE.md context contains the full team roster, roles, and expertise areas, so it knows which personas to consult for any given question. There is no separate "org hub" or "team chat" agent — your session handles orchestration directly.

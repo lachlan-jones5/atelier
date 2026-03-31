@@ -487,7 +487,7 @@ export function registerInitTools(register: typeof RegisterToolFn) {
           })),
           totalPersonas,
           agentFiles: agentCount,
-          nextStep: 'Use @"persona-name" to talk to teammates, or @"atelier-review" for code review.',
+          nextStep: 'Start a new session to talk to teammates: claude --agent persona-slug. For code review: claude --agent atelier-review. Or type @ in any session to pick an agent.',
         };
 
         return {

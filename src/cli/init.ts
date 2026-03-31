@@ -14,6 +14,7 @@ const __dirname = dirname(__filename);
  */
 function buildBootstrapAgent(mcpServerName: string, atelierSrcIndex: string, projectRoot: string): string {
   return `---
+name: atelier-init
 description: "Atelier initialization wizard. Guides you through setting up your simulated engineering organization."
 tools:
   - mcp__${mcpServerName}__atelier_init_analyse
@@ -134,7 +135,7 @@ atelier_init_finalize({})
 
 Tell the user setup is complete and they should switch to the main Atelier agent:
 
-> Setup complete! Your organization is ready. Switch to \`@"atelier"\` to start working with your team.
+> Setup complete! Your organization is ready. Start a new Claude Code session to work with your team. You can DM any teammate by starting a session with \`claude --agent persona-slug\`, or type \`@\` in any session and select from the list.
 
 ## Guidelines
 
@@ -251,5 +252,5 @@ export async function runInit(projectRoot: string): Promise<void> {
   console.log('  Created .claude/agents/atelier-init.md (bootstrap agent)');
 
   console.log();
-  console.log('Setup started. Run @"atelier-init" in Claude Code to complete initialization.');
+  console.log('Atelier initialized! To complete setup, start a new Claude Code session:\n\n  claude --agent atelier-init\n');
 }

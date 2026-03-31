@@ -20,17 +20,17 @@ You are working inside an Atelier-initialized project. A simulated engineering o
 
 ## Team Roster
 
-| Name | Role | Team | Archetype | Invoke |
-|------|------|------|-----------|--------|
+| Name | Role | Team | Archetype | Agent Slug |
+|------|------|------|-----------|------------|
 {{#each allPersonas}}
-| {{name}} | {{role}} | {{team}} | {{archetype}} | @"{{name}}" |
+| {{name}} | {{role}} | {{team}} | {{archetype}} | {{slug}} |
 {{/each}}
 
 ## How to Interact
 
-- **DM a teammate:** Mention them with @"Name" (e.g., @"Marcus Chen") for a 1:1 conversation
-- **Code review:** Use @"atelier-review" to submit code for multi-persona in-character review
-- **Get team input:** Ask "what does the team think about X?" and delegate to 2-3 relevant personas by mentioning them
+- **DM a teammate:** Start a dedicated session with `claude --agent persona-slug` (e.g., `claude --agent marcus-chen`), or type `@` in any session and select the agent from the list. You can also ask Claude to delegate: "Ask Marcus about the auth middleware."
+- **Code review:** Start a review session with `claude --agent atelier-review`, or type `@` and select atelier-review from the list
+- **Get team input:** Ask "what does the team think about X?" and Claude will delegate to 2-3 relevant personas
 - **Check the board:** Use the Atelier MCP tools (atelier_bead_list, atelier_org_status) to see what's in flight
 
 ## MCP Tools Available

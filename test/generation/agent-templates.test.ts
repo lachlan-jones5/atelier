@@ -88,12 +88,12 @@ describe('AgentTemplateEngine', () => {
   // ----- Template rendering tests -----
 
   describe('persona-dm template', () => {
-    it('renders correct frontmatter with human name', async () => {
+    it('renders correct frontmatter with slug as name', async () => {
       const eng = await loadEngine();
       const ctx = createMockContext();
       const output = eng.render('persona-dm', ctx);
 
-      expect(output).toContain('name: "Test Person"');
+      expect(output).toContain('name: test-person');
     });
 
     it('renders model field', async () => {
@@ -136,16 +136,16 @@ describe('AgentTemplateEngine', () => {
       expect(output).not.toContain('/agent ');
     });
 
-    it('escapes double quotes in persona names in YAML frontmatter', async () => {
+    it('escapes double quotes in persona names in YAML frontmatter description', async () => {
       const eng = await loadEngine();
       const persona = createMockPersona();
       persona.name = 'Sarah "Sal" Johnson';
       const ctx = createMockContext({ persona, allPersonas: [persona] });
       const output = eng.render('persona-dm', ctx);
 
-      // Frontmatter name field should have escaped quotes
-      expect(output).toContain('name: "Sarah \\"Sal\\" Johnson"');
-      // Description field should also have escaped quotes
+      // Name field uses slug (no quotes to escape)
+      expect(output).toContain('name: test-person');
+      // Description field should have escaped quotes
       expect(output).toContain('DM Sarah \\"Sal\\" Johnson');
     });
 
@@ -224,13 +224,14 @@ describe('AgentTemplateEngine', () => {
       expect(output).toContain('Test Org');
     });
 
-    it('contains persona names with @"name" syntax', async () => {
+    it('contains persona names and slugs in roster table', async () => {
       const eng = await loadEngine();
       const ctx = createMockContext();
       const output = eng.render('session-context', ctx);
 
       expect(output).toContain('Test Person');
-      expect(output).toContain('@"Test Person"');
+      expect(output).toContain('test-person');
+      expect(output).toContain('claude --agent');
     });
 
     it('does not contain YAML frontmatter', async () => {

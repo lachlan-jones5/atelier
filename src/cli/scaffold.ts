@@ -13,6 +13,7 @@ const __dirname = dirname(__filename);
  */
 function buildScaffoldAgent(mcpServerName: string, atelierSrcIndex: string, projectRoot: string): string {
   return `---
+name: atelier-scaffold
 description: "Atelier scaffold wizard. Generates a new project from scratch with code, git history, and a fictional software organization."
 tools:
   - mcp__${mcpServerName}__atelier_scaffold_generate
@@ -130,7 +131,7 @@ Now run the standard init flow to populate the organization:
 Tell the user their scaffolded project is ready:
 
 > Scaffold complete! Your project has been generated with ${'{'}commitCount{'}'} commits of history and a full Atelier organization.
-> Switch to \`@"atelier"\` to start working with your team.
+> Start a new Claude Code session to work with your team. You can DM any teammate with \`claude --agent persona-slug\`, or type \`@\` in any session and select from the list.
 
 ## Guidelines
 
@@ -253,5 +254,5 @@ export async function runScaffold(projectRoot: string): Promise<void> {
   console.log('  Created .claude/agents/atelier-scaffold.md (scaffold agent)');
 
   console.log();
-  console.log('Run @"atelier-scaffold" in Claude Code to generate your project');
+  console.log('Atelier scaffold ready! To generate your project, start a new Claude Code session:\n\n  claude --agent atelier-scaffold\n');
 }
