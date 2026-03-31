@@ -1,0 +1,38 @@
+{
+  "sessionId": "sess-test-042",
+  "startedAt": "2026-03-25T09:00:00.000Z",
+  "lastActiveAt": "2026-03-31T14:30:00.000Z",
+  "logicalDay": 7,
+  "events": [
+    {
+      "timestamp": "2026-03-25T09:10:00.000Z",
+      "type": "bead_claim",
+      "data": { "beadId": "bead-001", "persona": "alex" }
+    },
+    {
+      "timestamp": "2026-03-26T11:00:00.000Z",
+      "type": "bead_complete",
+      "data": { "beadId": "bead-001" }
+    },
+    {
+      "timestamp": "2026-03-27T09:30:00.000Z",
+      "type": "review_submit",
+      "data": { "beadId": "bead-002", "reviewer": "jordan" }
+    },
+    {
+      "timestamp": "2026-03-27T14:00:00.000Z",
+      "type": "review_complete",
+      "data": { "beadId": "bead-002", "verdict": "approve" }
+    },
+    {
+      "timestamp": "2026-03-28T10:00:00.000Z",
+      "type": "skill_observation",
+      "data": { "dimension": "testing", "delta": 0.15 }
+    },
+    {
+      "timestamp": "2026-03-30T09:00:00.000Z",
+      "type": "chat",
+      "data": { "speaker": "jordan", "summary": "Discussed error handling patterns" }
+    }
+  ]
+}

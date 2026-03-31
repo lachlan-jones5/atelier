@@ -1,0 +1,4 @@
+{"timestamp":"2026-03-31T09:00:00.000Z","speaker":"system","message":"Session started. Welcome to TestOrg."}
+{"timestamp":"2026-03-31T09:01:00.000Z","speaker":"alex","message":"Hey! Welcome to the backend team. I see you've set up the Express app — nice clean structure. I'd suggest we start by adding input validation to the users endpoint. I've filed a bead for it."}
+{"timestamp":"2026-03-31T09:02:00.000Z","speaker":"user","message":"Thanks Alex! I'll take a look at that. Should I use zod or express-validator for the validation?"}
+{"timestamp":"2026-03-31T09:03:00.000Z","speaker":"alex","message":"Great question. I'd recommend zod — it gives you TypeScript types for free and the error messages are pretty good out of the box. Here's the general pattern: define your schema, then parse the request body in the route handler."}

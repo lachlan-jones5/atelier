@@ -1,0 +1,22 @@
+id: bead-005
+title: "Refactor error handling to use Result type"
+description: "Replace thrown exceptions with a Result<T, E> pattern for predictable error handling across the API layer."
+team: backend
+priority: low
+status: open
+assigned_to: null
+depends_on: []
+blocked_by: []
+acceptance_criteria:
+  - "Result type is defined and exported"
+  - "At least two route handlers use Result instead of try/catch"
+  - "Error responses are consistent across all refactored routes"
+skill_targets:
+  - design
+  - reading_code
+type: refactor
+files:
+  - src/util/result.ts
+  - src/routes/users.ts
+created_at: "2026-03-30T09:00:00.000Z"
+completed_at: null

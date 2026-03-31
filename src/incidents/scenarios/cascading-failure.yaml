@@ -1,0 +1,53 @@
+id: cascading-failure
+title: "Service Dependency Cascade"
+description: >
+  Multiple services are experiencing elevated error rates and timeouts.
+  Circuit breakers have tripped on three upstream services. The on-call
+  pager has fired twelve times in the last twenty minutes. Customer-facing
+  error rate is at 34% and climbing.
+severity: sev1
+symptoms:
+  - "Circuit breakers tripped on payment-service, inventory-service, and notification-service"
+  - "Timeout errors propagating from order-service to all upstream callers"
+  - "Customer-facing 5xx error rate at 34% and climbing"
+  - "Request queues backing up across the service mesh"
+  - "order-service p99 latency at 30s (normally 150ms)"
+  - "Thread pool exhaustion warnings in API gateway logs"
+root_cause: >
+  The order-service has a deadlock in its database connection pool under
+  concurrent load. When two transactions attempt to acquire locks on the
+  orders and inventory tables in opposite order, they deadlock. The
+  connection pool becomes exhausted within minutes, causing all downstream
+  calls to queue and eventually time out, propagating failures upstream
+  through the service mesh.
+red_herrings:
+  - "A network blip was detected 30 minutes ago (resolved itself, unrelated)"
+  - "DNS resolution times spiked briefly (consequence, not cause)"
+  - "Load balancer health checks are showing intermittent failures (symptom of the cascade)"
+  - "A config change was pushed to the service mesh 2 hours ago (only changed logging levels)"
+resolution_steps:
+  - "Identify order-service as the origin point via dependency graph analysis"
+  - "Detect the deadlock pattern in database slow query logs"
+  - "Kill the deadlocked transactions to restore connection pool"
+  - "Deploy a hotfix that enforces consistent lock ordering"
+  - "Reset circuit breakers once order-service recovers"
+  - "Verify end-to-end request flow is healthy"
+affected_systems:
+  - order-service
+  - payment-service
+  - inventory-service
+  - notification-service
+  - api-gateway
+  - customer-web
+escalation_triggers:
+  - "Error rate exceeds 50%"
+  - "More than 5 services affected"
+  - "Customer-facing impact persists beyond 15 minutes"
+  - "Revenue loss estimated above threshold"
+persona_reactions:
+  mentor: "Start from the bottom of the dependency graph. Which service started failing first? The timestamps in the alerts will tell you."
+  gatekeeper: "We need an incident commander NOW. This is customer-facing. Who has the runbook for cascading failures?"
+  pragmatist: "Can we shed load at the gateway? Even a 50% traffic reduction might let the system recover."
+  firefighter: "I'm pulling up the service dependency map. Let me trace the failure origin - circuit breakers trip in order, the first one to trip is our suspect."
+  newbie: "I've never seen this many services fail at once. Should I be looking at anything specific?"
+  architect: "This is exactly the failure mode I warned about. We need bulkheads between these services - they share too many failure domains."

@@ -1,0 +1,9 @@
+{
+  "reading_code": 0.2,
+  "testing": 0.35,
+  "debugging": 0.15,
+  "design": 0.1,
+  "review": 0.25,
+  "communication": 0.2,
+  "ops_awareness": 0.05
+}

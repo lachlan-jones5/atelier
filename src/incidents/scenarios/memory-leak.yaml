@@ -1,0 +1,45 @@
+id: memory-leak
+title: "Gradual Memory Leak in Production"
+description: >
+  Production service memory usage has been climbing steadily over the past
+  several hours. Monitoring alerts fired when heap usage crossed the 85%
+  threshold. Two OOM kills have occurred on separate pods in the last hour,
+  and p99 response times have degraded from 200ms to 1.2s.
+severity: sev2
+symptoms:
+  - "Heap memory usage climbing ~50MB/hour across all pods"
+  - "Two OOM kills in the past hour (pods api-7b and api-3a)"
+  - "p99 latency degraded from 200ms to 1.2s"
+  - "Garbage collection pauses increasing in frequency and duration"
+  - "RSS growing even after GC cycles complete"
+root_cause: >
+  An unbounded in-memory cache in the request authentication middleware is
+  retaining parsed JWT tokens indefinitely. Each unique token adds ~2KB that
+  is never evicted. Under normal traffic (~500 req/s), this accumulates
+  roughly 60MB/hour.
+red_herrings:
+  - "A deploy went out 6 hours ago (but it only changed copy strings)"
+  - "Traffic is 15% above the weekly average (within normal variance)"
+  - "Database connection pool usage is at 70% (normal for this time of day)"
+  - "A dependency was bumped last week (unrelated serialization library)"
+resolution_steps:
+  - "Identify the leaking allocation via heap snapshot comparison"
+  - "Trace the growth to the auth middleware token cache"
+  - "Add an LRU eviction policy with a max-size of 10,000 entries"
+  - "Deploy the fix and verify memory stabilizes"
+  - "Set up a memory growth rate alert for early detection"
+affected_systems:
+  - api-gateway
+  - authentication-service
+  - upstream-clients
+escalation_triggers:
+  - "Third OOM kill occurs"
+  - "p99 latency exceeds 3s"
+  - "More than 2 hours without root cause identification"
+persona_reactions:
+  mentor: "Have you tried taking a heap snapshot diff between two time points? That usually narrows it down fast."
+  gatekeeper: "We need to understand why our memory alerts didn't fire earlier. The threshold was too generous."
+  pragmatist: "Let's restart the worst pods to buy time while we investigate. Users are feeling this."
+  firefighter: "I've seen this pattern before - check any in-memory caches that don't have eviction policies."
+  newbie: "How do you take a heap snapshot in production without affecting performance?"
+  domain-expert: "The auth middleware has always been a concern. Check the token cache - I don't think it has a size limit."

@@ -1,0 +1,52 @@
+id: data-corruption
+title: "Silent Data Corruption"
+description: >
+  Customer support has escalated multiple tickets reporting incorrect data
+  in their dashboards. Some users see stale values, others see data that
+  belongs to different accounts. The issue appears intermittent and
+  affects roughly 5% of requests. No alerts fired - this was caught by
+  user reports.
+severity: sev2
+symptoms:
+  - "Users reporting incorrect dashboard values (~5% of requests affected)"
+  - "Some queries return stale data that doesn't match recent writes"
+  - "Intermittent cross-account data leakage in aggregation endpoints"
+  - "Data inconsistencies between list and detail views for the same entity"
+  - "Issue is non-deterministic and hard to reproduce consistently"
+root_cause: >
+  A race condition in the concurrent write path of the user-data-service
+  allows two simultaneous writes to the same partition key to interleave.
+  When a read-modify-write cycle overlaps with another write, the second
+  write silently overwrites the first without conflict detection. The
+  partition key includes account_id, so under high concurrency the wrong
+  version can be returned or, in aggregation queries, data from adjacent
+  partition ranges bleeds through.
+red_herrings:
+  - "The CDN cache TTL was recently changed from 60s to 300s (only affects static assets)"
+  - "Database replica lag is at 150ms (within normal SLA, and reads go to primary for this path)"
+  - "A schema migration ran last week adding a new index (completed cleanly, unrelated table)"
+  - "The query planner recently changed execution plans after an ANALYZE (improved performance, unrelated)"
+resolution_steps:
+  - "Reproduce the issue by running concurrent writes to the same partition in staging"
+  - "Identify the read-modify-write cycle lacking optimistic concurrency control"
+  - "Add version-based optimistic locking to the write path"
+  - "Backfill corrupted records from the write-ahead log"
+  - "Add a data consistency checker as a background job"
+  - "Notify affected customers once data is corrected"
+affected_systems:
+  - user-data-service
+  - dashboard-api
+  - aggregation-pipeline
+  - reporting-service
+escalation_triggers:
+  - "Affected request percentage exceeds 10%"
+  - "Cross-account data leakage confirmed"
+  - "More than 4 hours without root cause identification"
+  - "Regulatory or compliance implications identified"
+persona_reactions:
+  mentor: "Data corruption bugs are the hardest to debug. Start by finding two requests that return different data for the same query - compare their timing."
+  gatekeeper: "This could have compliance implications. We need to scope the blast radius immediately - how many accounts are affected?"
+  pragmatist: "Can we add a consistency check that compares read results against the write log? That would at least tell us the scope."
+  domain-expert: "The write path in user-data-service was always tricky. Check if concurrent writes to the same partition are handled atomically."
+  skeptic: "Are we sure this isn't just eventual consistency being misinterpreted? Let's verify the read path is actually hitting the primary."
+  newbie: "How do race conditions cause data corruption? I thought the database handles concurrency."

@@ -1,0 +1,13 @@
+name: "Backend"
+slug: backend
+domain: "API and data services"
+techStack:
+  - typescript
+  - node
+  - postgresql
+codebasePaths:
+  - src/
+  - lib/
+personas:
+  - alex
+  - jordan

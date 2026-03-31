@@ -1,0 +1,131 @@
+id: open-source
+title: "Contribute to Open Source"
+description: >
+  Build confidence contributing to unfamiliar codebases. Practice
+  navigating new code, making focused changes, and submitting
+  quality pull requests that maintainers want to merge.
+target_skills:
+  - reading_code
+  - communication
+  - review
+experience_level: journeyman
+estimated_hours: 10
+
+sequences:
+  - id: oss-navigate
+    title: "Navigate Unfamiliar Code"
+    description: >
+      Learn systematic techniques for understanding a codebase
+      you've never seen before.
+    completion_criteria: "Can explain the project's architecture and find where to make a change"
+    bead_templates:
+      - id: oss-nav-orientation
+        title: "Orient yourself in the codebase"
+        description: >
+          Map the high-level architecture of an unfamiliar project.
+          Identify entry points, key abstractions, and data flow.
+        type: docs
+        priority: high
+        acceptance_criteria:
+          - "Entry points (main, CLI, server) are identified"
+          - "Key abstractions and their relationships are mapped"
+          - "Data flow for one user-facing feature is traced"
+        skill_targets:
+          - reading_code
+        hints:
+          - "Start with the build config and entry point, not the README"
+          - "Trace one request or command from start to finish"
+
+      - id: oss-nav-conventions
+        title: "Identify project conventions"
+        description: >
+          Document the project's coding conventions, patterns, and
+          unwritten rules by reading existing code.
+        type: docs
+        priority: medium
+        acceptance_criteria:
+          - "Naming conventions are documented"
+          - "Error handling patterns are identified"
+          - "Test conventions (file location, naming, helpers) are noted"
+        skill_targets:
+          - reading_code
+          - communication
+        depends_on_template:
+          - oss-nav-orientation
+
+  - id: oss-change
+    title: "Make Focused Changes"
+    description: >
+      Practice making minimal, well-scoped changes that solve one
+      problem without unnecessary modifications.
+    completion_criteria: "Change is minimal, follows project conventions, and includes tests"
+    bead_templates:
+      - id: oss-change-scope
+        title: "Scope a contribution"
+        description: >
+          Pick an issue and plan the minimal set of changes needed.
+          Identify what files to touch and what to leave alone.
+        type: docs
+        priority: high
+        acceptance_criteria:
+          - "Issue is clearly understood and restated"
+          - "Files to modify are listed with planned changes"
+          - "Out-of-scope changes are explicitly noted as separate work"
+        skill_targets:
+          - reading_code
+          - design
+
+      - id: oss-change-implement
+        title: "Implement the change"
+        description: >
+          Make the planned changes following the project's conventions.
+          Include tests that match the project's testing patterns.
+        type: feature
+        priority: high
+        acceptance_criteria:
+          - "Change follows project coding conventions"
+          - "Tests are written matching the project's test style"
+          - "No unrelated formatting or refactoring changes"
+        skill_targets:
+          - reading_code
+        depends_on_template:
+          - oss-change-scope
+
+  - id: oss-submit
+    title: "Submit Quality PR"
+    description: >
+      Write a pull request that tells a clear story and makes the
+      maintainer's job easy.
+    completion_criteria: "PR is submitted with clear description and responsive to feedback"
+    bead_templates:
+      - id: oss-submit-pr
+        title: "Write the pull request"
+        description: >
+          Create a PR with a clear title, description explaining the
+          why and how, and links to relevant issues.
+        type: docs
+        priority: high
+        acceptance_criteria:
+          - "Title summarizes the change in under 70 characters"
+          - "Description explains why the change is needed"
+          - "Related issue is linked"
+          - "Screenshots or output samples included if relevant"
+        skill_targets:
+          - communication
+
+      - id: oss-submit-respond
+        title: "Respond to maintainer feedback"
+        description: >
+          Address review feedback from maintainers, iterate on the
+          change, and get it to a mergeable state.
+        type: refactor
+        priority: medium
+        acceptance_criteria:
+          - "All feedback is acknowledged and addressed"
+          - "Changes are made in follow-up commits (not force-pushed)"
+          - "Tone is respectful and collaborative"
+        skill_targets:
+          - communication
+          - review
+        depends_on_template:
+          - oss-submit-pr

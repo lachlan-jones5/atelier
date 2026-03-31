@@ -1,0 +1,25 @@
+name: "Backend Fundamentals"
+status: active
+started_at: "2026-03-25T09:00:00.000Z"
+modules:
+  - id: mod-01
+    title: "API Input Validation"
+    status: completed
+    beads:
+      - bead-001
+  - id: mod-02
+    title: "Testing Practices"
+    status: completed
+    beads:
+      - bead-002
+  - id: mod-03
+    title: "Database Fundamentals"
+    status: active
+    beads:
+      - bead-003
+  - id: mod-04
+    title: "API Hardening"
+    status: available
+    beads:
+      - bead-004
+      - bead-005

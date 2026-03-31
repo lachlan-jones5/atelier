@@ -1,0 +1,26 @@
+id: bead-004
+title: "Add rate limiting middleware"
+description: "Implement rate limiting to prevent API abuse. Use a sliding window algorithm with Redis backing."
+team: backend
+priority: medium
+status: open
+assigned_to: null
+depends_on:
+  - bead-003
+blocked_by:
+  - bead-003
+acceptance_criteria:
+  - "Rate limit of 100 requests per minute per IP"
+  - "Returns 429 with Retry-After header when exceeded"
+  - "Rate limit config is per-route configurable"
+skill_targets:
+  - design
+  - debugging
+type: feature
+files:
+  - src/middleware/rate-limit.ts
+hints:
+  - "Consider using a token bucket or sliding window counter"
+  - "Redis MULTI/EXEC for atomic increment and expiry"
+created_at: "2026-03-29T09:00:00.000Z"
+completed_at: null

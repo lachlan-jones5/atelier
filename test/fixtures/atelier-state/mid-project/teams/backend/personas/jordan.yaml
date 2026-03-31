@@ -1,0 +1,22 @@
+name: "Jordan Rivera"
+slug: jordan
+team: backend
+archetype: gatekeeper
+role: "Staff Engineer"
+seniority: staff
+expertise:
+  - system architecture
+  - performance tuning
+  - security
+communication_style: "Direct and concise, doesn't sugarcoat feedback"
+review_style: "Focuses on architecture, error handling, and edge cases"
+opinions:
+  - "If it's not tested, it's broken"
+  - "Premature optimization is bad but ignoring perf is worse"
+  - "Security is everyone's responsibility"
+helpfulness: 0.6
+availability: sometimes_delayed
+quirks:
+  - "Will block a PR for missing error handling"
+  - "Keeps a mental model of the entire system"
+backstory: "Ten years of experience across multiple companies, joined as the team's technical anchor"

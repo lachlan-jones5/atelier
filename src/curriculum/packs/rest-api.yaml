@@ -1,0 +1,164 @@
+id: rest-api
+title: "Build a REST API from Scratch"
+description: >
+  Learn to design, implement, and test a production-quality REST API.
+  Covers project scaffolding, CRUD endpoints, authentication, and
+  comprehensive testing strategies.
+target_skills:
+  - design
+  - testing
+  - communication
+experience_level: apprentice
+estimated_hours: 12
+
+sequences:
+  - id: rest-api-setup
+    title: "Setup & Scaffolding"
+    description: >
+      Bootstrap a new API project with proper structure, configuration,
+      and a health check endpoint.
+    completion_criteria: "Project runs locally with a working /health endpoint and linter passing"
+    bead_templates:
+      - id: rest-setup-scaffold
+        title: "Scaffold the project"
+        description: >
+          Initialize the project with package manager, TypeScript config,
+          linter, and directory structure for routes, models, and tests.
+        type: infra
+        priority: high
+        acceptance_criteria:
+          - "Project has package.json with required dependencies"
+          - "TypeScript compiles without errors"
+          - "Linter runs and passes on empty project"
+        skill_targets:
+          - design
+        hints:
+          - "Consider what directory structure will scale as you add more routes"
+          - "Set up path aliases early to avoid painful refactors later"
+
+      - id: rest-setup-health
+        title: "Add health check endpoint"
+        description: >
+          Create a GET /health endpoint that returns server status.
+          This validates the routing framework is wired up correctly.
+        type: feature
+        priority: high
+        acceptance_criteria:
+          - "GET /health returns 200 with JSON body"
+          - "Response includes uptime and version fields"
+        skill_targets:
+          - design
+          - testing
+        depends_on_template:
+          - rest-setup-scaffold
+
+      - id: rest-setup-docs
+        title: "Document API conventions"
+        description: >
+          Write a brief API conventions doc covering URL patterns,
+          response envelope format, error shapes, and status code usage.
+        type: docs
+        priority: medium
+        acceptance_criteria:
+          - "Conventions doc exists and covers response format"
+          - "Error response shape is documented with examples"
+        skill_targets:
+          - communication
+          - design
+        depends_on_template:
+          - rest-setup-health
+
+  - id: rest-api-crud
+    title: "CRUD Endpoints"
+    description: >
+      Implement create, read, update, and delete operations for a
+      resource, with validation and proper HTTP semantics.
+    completion_criteria: "All CRUD operations work correctly with proper status codes and validation"
+    bead_templates:
+      - id: rest-crud-model
+        title: "Define the data model"
+        description: >
+          Design and implement the data model for your primary resource.
+          Include validation rules and type definitions.
+        type: feature
+        priority: high
+        acceptance_criteria:
+          - "Model type is defined with all required fields"
+          - "Validation rejects invalid input with clear messages"
+          - "In-memory store supports basic CRUD operations"
+        skill_targets:
+          - design
+
+      - id: rest-crud-endpoints
+        title: "Implement CRUD routes"
+        description: >
+          Build POST, GET, GET/:id, PUT/:id, and DELETE/:id endpoints.
+          Each must use correct HTTP status codes and handle errors.
+        type: feature
+        priority: high
+        acceptance_criteria:
+          - "POST returns 201 with created resource"
+          - "GET returns 200 with array of resources"
+          - "GET/:id returns 404 for missing resources"
+          - "PUT/:id returns 200 with updated resource"
+          - "DELETE/:id returns 204 on success"
+        skill_targets:
+          - design
+          - communication
+        depends_on_template:
+          - rest-crud-model
+
+      - id: rest-crud-tests
+        title: "Write endpoint tests"
+        description: >
+          Add integration tests for each CRUD endpoint covering
+          happy paths and error cases.
+        type: test
+        priority: medium
+        acceptance_criteria:
+          - "Each endpoint has at least one happy-path test"
+          - "Error cases are tested (404, 400, etc.)"
+          - "Tests run in isolation without shared state"
+        skill_targets:
+          - testing
+        depends_on_template:
+          - rest-crud-endpoints
+
+  - id: rest-api-auth
+    title: "Auth & Testing"
+    description: >
+      Add authentication middleware and comprehensive test coverage
+      to prepare the API for production use.
+    completion_criteria: "Auth middleware protects routes and test coverage exceeds 80%"
+    bead_templates:
+      - id: rest-auth-middleware
+        title: "Implement auth middleware"
+        description: >
+          Create authentication middleware that validates tokens
+          and attaches user context to requests.
+        type: feature
+        priority: high
+        acceptance_criteria:
+          - "Unauthenticated requests receive 401"
+          - "Valid tokens grant access to protected routes"
+          - "User context is available in route handlers"
+        skill_targets:
+          - design
+          - testing
+
+      - id: rest-auth-tests
+        title: "Write auth integration tests"
+        description: >
+          Test authentication flows end-to-end including token
+          validation, expiry, and protected route access.
+        type: test
+        priority: medium
+        acceptance_criteria:
+          - "Tests cover valid and invalid tokens"
+          - "Token expiry is tested"
+          - "Protected and public routes behave correctly"
+        skill_targets:
+          - testing
+          - communication
+        depends_on_template:
+          - rest-auth-middleware

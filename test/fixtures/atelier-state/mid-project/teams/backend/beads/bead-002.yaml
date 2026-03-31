@@ -1,0 +1,25 @@
+id: bead-002
+title: "Write unit tests for auth middleware"
+description: "The auth middleware has no test coverage. Write tests covering valid tokens, missing tokens, and expired tokens."
+team: backend
+priority: high
+status: done
+assigned_to: alex
+depends_on: []
+blocked_by: []
+acceptance_criteria:
+  - "Test passes for valid bearer token"
+  - "Test returns 401 for missing token"
+  - "Test returns 401 for expired token"
+  - "Tests use mocked auth service"
+skill_targets:
+  - testing
+type: test
+files:
+  - src/middleware/auth.ts
+  - test/auth.test.ts
+created_at: "2026-03-25T09:05:00.000Z"
+completed_at: "2026-03-27T14:00:00.000Z"
+review_feedback:
+  - "Solid test structure. The mock setup is clean."
+  - "Consider adding a test for malformed tokens (not just missing/expired)."

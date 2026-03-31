@@ -1,0 +1,25 @@
+id: bead-003
+title: "Add database connection pooling"
+description: "Replace single database connection with a connection pool. Configure pool size based on environment variables."
+team: backend
+priority: high
+status: in_progress
+assigned_to: user
+depends_on:
+  - bead-001
+blocked_by: []
+acceptance_criteria:
+  - "Database uses connection pool with configurable size"
+  - "Pool size defaults to 10 in production, 2 in test"
+  - "Connections are properly released after queries"
+  - "Health endpoint reports pool status"
+skill_targets:
+  - design
+  - ops_awareness
+type: feature
+files:
+  - src/db/pool.ts
+  - src/db/config.ts
+branch: "feat/db-pooling"
+created_at: "2026-03-28T09:00:00.000Z"
+completed_at: null

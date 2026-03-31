@@ -1,0 +1,56 @@
+id: deploy-rollback
+title: "Failed Deploy Requiring Rollback"
+description: >
+  A production deploy of v2.14.0 has gone badly. The new version started
+  rolling out 15 minutes ago and 500 errors are spiking across the fleet.
+  New pods are crash-looping with panic traces in the logs. The deploy is
+  at 40% rollout - some pods are on the new version, others on v2.13.2.
+  Mixed-version traffic is causing additional issues.
+severity: sev1
+symptoms:
+  - "5xx error rate jumped from 0.1% to 28% starting 15 minutes ago"
+  - "New pods (v2.14.0) crash-looping with panic on startup after ~30s"
+  - "Mixed version fleet causing inconsistent API responses"
+  - "Rollout is at 40% - canary checks were passing until they weren't"
+  - "Error logs show 'column user_preferences not found' in database queries"
+  - "Health check endpoint returns 200 but application fails on first real request"
+root_cause: >
+  The database migration for v2.14.0 adds a new user_preferences JSONB
+  column and backfills it, but the migration was applied before the code
+  deploy completed. The old version (v2.13.2) doesn't know about this
+  column and ignores it, but the new code (v2.14.0) expects the migration
+  to have also added a NOT NULL constraint with a default value. The
+  migration script applies the constraint in a second step that hasn't
+  run yet, so the new code panics when it reads NULL from the column on
+  existing rows that haven't been backfilled.
+red_herrings:
+  - "A config map change was deployed alongside the code (only updated log format strings)"
+  - "A dependency version mismatch warning in the build logs (cosmetic, pinned in lockfile)"
+  - "Pod resource limits were adjusted last week (increased, not decreased)"
+  - "The canary region has slightly different traffic patterns (the issue is data-dependent, not traffic-dependent)"
+resolution_steps:
+  - "Immediately halt the rollout to prevent more pods from updating"
+  - "Roll back all v2.14.0 pods to v2.13.2"
+  - "Verify the rollback stabilizes error rates"
+  - "Investigate the migration ordering - migration must complete before code deploy"
+  - "Fix the migration to add DEFAULT and NOT NULL in a single step"
+  - "Re-deploy with corrected migration ordering (migrate-then-deploy)"
+  - "Add a pre-deploy check that validates migration state matches code expectations"
+affected_systems:
+  - api-service
+  - database-primary
+  - deploy-pipeline
+  - cdn-edge
+  - mobile-clients
+escalation_triggers:
+  - "Error rate exceeds 50%"
+  - "Rollback fails or takes longer than 10 minutes"
+  - "Data integrity issues detected from mixed-version writes"
+  - "Mobile clients caching bad responses"
+persona_reactions:
+  mentor: "First priority: stop the bleed. Halt the rollout, then roll back. We can debug once traffic is healthy."
+  gatekeeper: "Why did the canary checks pass? We need to understand the gap in our deploy validation."
+  pragmatist: "Roll it back NOW. We can figure out what went wrong after. Every minute at 28% errors is lost revenue."
+  firefighter: "I'm initiating the rollback. Someone check if the partial migration is safe to leave in place with the old code."
+  architect: "This is a classic migration-deploy ordering issue. We need to enforce that migrations are backward-compatible."
+  newbie: "Should I be worried about the database being in a weird state from the partial migration?"

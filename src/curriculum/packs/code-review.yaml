@@ -1,0 +1,109 @@
+id: code-review
+title: "Give and Receive Effective Code Review"
+description: >
+  Practice the craft of code review from both sides. Learn to give
+  constructive, actionable feedback and respond to review comments
+  productively.
+target_skills:
+  - review
+  - communication
+  - reading_code
+experience_level: apprentice
+estimated_hours: 6
+
+sequences:
+  - id: review-giving
+    title: "Reviewing Others' Code"
+    description: >
+      Practice reading unfamiliar code, identifying issues at different
+      severity levels, and writing helpful review comments.
+    completion_criteria: "Review includes blocking issues, suggestions, and nits with clear rationale"
+    bead_templates:
+      - id: review-give-read
+        title: "Read and summarize unfamiliar code"
+        description: >
+          Read a pull request diff and write a summary of what the change
+          does, what it affects, and any areas of concern.
+        type: docs
+        priority: high
+        acceptance_criteria:
+          - "Summary accurately describes the change's purpose"
+          - "Affected areas (files, modules, APIs) are identified"
+          - "Open questions or unclear areas are noted"
+        skill_targets:
+          - reading_code
+          - communication
+
+      - id: review-give-comments
+        title: "Write review comments"
+        description: >
+          Write review comments at three severity levels: blocking issues,
+          suggestions for improvement, and minor nits.
+        type: docs
+        priority: high
+        acceptance_criteria:
+          - "At least one blocking comment with clear explanation of the problem"
+          - "At least two suggestions with rationale and alternatives"
+          - "Nits are clearly marked as optional"
+          - "All comments reference specific lines"
+        skill_targets:
+          - review
+          - communication
+        depends_on_template:
+          - review-give-read
+
+      - id: review-give-verdict
+        title: "Write a review verdict"
+        description: >
+          Synthesize individual comments into an overall review verdict
+          with a summary of key findings and required changes.
+        type: docs
+        priority: medium
+        acceptance_criteria:
+          - "Verdict is one of: approve, request changes, or comment"
+          - "Summary highlights the most important feedback"
+          - "Positive aspects of the change are acknowledged"
+        skill_targets:
+          - review
+          - communication
+        depends_on_template:
+          - review-give-comments
+
+  - id: review-receiving
+    title: "Responding to Feedback"
+    description: >
+      Practice responding to code review comments constructively,
+      deciding when to push back, and iterating on feedback.
+    completion_criteria: "All review comments are addressed with appropriate responses"
+    bead_templates:
+      - id: review-receive-respond
+        title: "Respond to review comments"
+        description: >
+          Given a set of review comments on your code, write responses
+          that address each one — either with a fix or a reasoned pushback.
+        type: docs
+        priority: high
+        acceptance_criteria:
+          - "Every comment has a response"
+          - "Blocking issues are fixed or discussed with alternatives"
+          - "Pushbacks include technical rationale, not just disagreement"
+        skill_targets:
+          - communication
+          - review
+
+      - id: review-receive-iterate
+        title: "Iterate and resolve"
+        description: >
+          Make the requested changes, update the PR, and write a
+          re-review summary highlighting what changed.
+        type: refactor
+        priority: medium
+        acceptance_criteria:
+          - "All accepted changes are implemented"
+          - "Re-review summary maps comments to fixes"
+          - "No new issues introduced by the changes"
+        skill_targets:
+          - review
+          - reading_code
+        depends_on_template:
+          - review-receive-respond

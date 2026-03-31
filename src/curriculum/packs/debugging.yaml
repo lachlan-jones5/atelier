@@ -1,0 +1,129 @@
+id: debugging
+title: "Debug Production Incidents"
+description: >
+  Build systematic debugging skills for production environments.
+  Practice log analysis, root cause identification, and writing
+  fixes that prevent recurrence.
+target_skills:
+  - debugging
+  - ops_awareness
+  - communication
+experience_level: journeyman
+estimated_hours: 8
+
+sequences:
+  - id: debug-log-analysis
+    title: "Log Analysis"
+    description: >
+      Learn to navigate production logs efficiently, identify error
+      patterns, and correlate events across services.
+    completion_criteria: "Can extract actionable insights from raw log output and write a timeline"
+    bead_templates:
+      - id: debug-log-setup
+        title: "Set up structured logging"
+        description: >
+          Add structured JSON logging to an application with correlation
+          IDs, timestamps, and severity levels.
+        type: infra
+        priority: high
+        acceptance_criteria:
+          - "Logs are JSON formatted with timestamp and level"
+          - "Correlation ID is propagated across function calls"
+          - "Log levels are used appropriately (error vs warn vs info)"
+        skill_targets:
+          - ops_awareness
+          - debugging
+
+      - id: debug-log-investigate
+        title: "Investigate a log-based incident"
+        description: >
+          Given a set of application logs containing an intermittent error,
+          identify the pattern and write up a timeline of events.
+        type: bugfix
+        priority: high
+        acceptance_criteria:
+          - "Timeline of events is documented"
+          - "Error pattern is identified with evidence from logs"
+          - "Affected scope (users, endpoints) is quantified"
+        skill_targets:
+          - debugging
+          - communication
+        depends_on_template:
+          - debug-log-setup
+
+  - id: debug-root-cause
+    title: "Root Cause Identification"
+    description: >
+      Practice systematic root cause analysis techniques including
+      bisection, hypothesis testing, and reproducer creation.
+    completion_criteria: "Root cause is identified with a minimal reproducer"
+    bead_templates:
+      - id: debug-rca-reproduce
+        title: "Create a minimal reproducer"
+        description: >
+          Take a reported bug and reduce it to the smallest possible
+          test case that reliably triggers the issue.
+        type: bugfix
+        priority: high
+        acceptance_criteria:
+          - "Reproducer runs in under 5 seconds"
+          - "Reproducer is self-contained (no external deps)"
+          - "Failure mode matches the production report"
+        skill_targets:
+          - debugging
+
+      - id: debug-rca-analysis
+        title: "Write a root cause analysis"
+        description: >
+          Document the root cause, contributing factors, and the chain
+          of events that led to the incident.
+        type: docs
+        priority: medium
+        acceptance_criteria:
+          - "Root cause is clearly stated in one sentence"
+          - "Contributing factors are listed"
+          - "Timeline links cause to observed symptoms"
+        skill_targets:
+          - communication
+          - debugging
+        depends_on_template:
+          - debug-rca-reproduce
+
+  - id: debug-fix-prevent
+    title: "Fix & Prevent"
+    description: >
+      Implement a fix for the identified root cause and add safeguards
+      to prevent recurrence.
+    completion_criteria: "Fix is deployed with regression test and monitoring alert"
+    bead_templates:
+      - id: debug-fix-implement
+        title: "Implement the fix with regression test"
+        description: >
+          Write the fix for the root cause and a regression test that
+          would catch the issue if it were reintroduced.
+        type: bugfix
+        priority: critical
+        acceptance_criteria:
+          - "Fix addresses the root cause, not just symptoms"
+          - "Regression test fails without the fix"
+          - "Regression test passes with the fix"
+        skill_targets:
+          - debugging
+          - ops_awareness
+
+      - id: debug-fix-postmortem
+        title: "Write a postmortem"
+        description: >
+          Write a blameless postmortem covering what happened, impact,
+          root cause, fix, and action items to prevent recurrence.
+        type: docs
+        priority: medium
+        acceptance_criteria:
+          - "Postmortem follows blameless format"
+          - "Impact is quantified (duration, affected users)"
+          - "Action items have owners and deadlines"
+        skill_targets:
+          - communication
+          - ops_awareness
+        depends_on_template:
+          - debug-fix-implement

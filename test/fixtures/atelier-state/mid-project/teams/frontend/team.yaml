@@ -1,0 +1,12 @@
+name: "Frontend"
+slug: frontend
+domain: "Web UI and user experience"
+techStack:
+  - typescript
+  - react
+  - tailwind
+codebasePaths:
+  - app/
+  - components/
+personas:
+  - sam

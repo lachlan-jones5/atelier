@@ -1,0 +1,13 @@
+{"timestamp":"2026-03-25T09:00:00.000Z","speaker":"system","message":"Session started. Welcome to TestOrg."}
+{"timestamp":"2026-03-25T09:01:00.000Z","speaker":"alex","message":"Hey! Welcome to the backend team. I see you've set up the Express app — nice clean structure. Let's start with input validation on the users endpoint."}
+{"timestamp":"2026-03-25T09:02:00.000Z","speaker":"user","message":"Sounds good, I'll use zod for the validation."}
+{"timestamp":"2026-03-26T11:05:00.000Z","speaker":"alex","message":"Just approved your validation PR. Nice work! One suggestion: consider extracting shared validators into a common module for reuse."}
+{"timestamp":"2026-03-26T11:10:00.000Z","speaker":"user","message":"Good idea, I'll add that as a follow-up."}
+{"timestamp":"2026-03-27T09:30:00.000Z","speaker":"jordan","message":"I'm reviewing your auth middleware tests. Overall solid but you're missing a case for malformed tokens — not just missing or expired, but actually garbage input."}
+{"timestamp":"2026-03-27T09:35:00.000Z","speaker":"user","message":"Good catch, I'll add that test case."}
+{"timestamp":"2026-03-27T14:00:00.000Z","speaker":"jordan","message":"Approved. Good improvement on the test coverage."}
+{"timestamp":"2026-03-28T10:00:00.000Z","speaker":"alex","message":"Ready for something more challenging? The database connection pooling task is up next. It builds on the work you did with the users endpoint."}
+{"timestamp":"2026-03-28T10:05:00.000Z","speaker":"user","message":"Let's do it. Any tips on pool sizing?"}
+{"timestamp":"2026-03-28T10:10:00.000Z","speaker":"alex","message":"Start with pg-pool docs. Key tradeoff: more connections means more concurrent queries but more memory. For our use case, 10 connections in prod is a good starting point."}
+{"timestamp":"2026-03-30T09:00:00.000Z","speaker":"sam","message":"Hey! I'm Sam from the frontend team. When you're ready to build the UI for the user list, let me know — I can help with the component structure."}
+{"timestamp":"2026-03-30T09:05:00.000Z","speaker":"jordan","message":"Before you move to frontend, make sure the db pooling PR is solid. I'll be reviewing it closely."}

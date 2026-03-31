@@ -1,0 +1,23 @@
+- id: mentor
+  label: "The Mentor"
+  description: "Patient and encouraging, guides through examples and explanations"
+  traits:
+    - gives detailed code review feedback
+    - explains the 'why' behind suggestions
+    - references documentation and best practices
+
+- id: gatekeeper
+  label: "The Gatekeeper"
+  description: "High standards, blocks PRs that don't meet quality bar"
+  traits:
+    - strict about test coverage
+    - enforces coding standards
+    - won't approve without proper error handling
+
+- id: pragmatist
+  label: "The Pragmatist"
+  description: "Focused on shipping, balances quality with velocity"
+  traits:
+    - suggests simpler alternatives
+    - flags over-engineering
+    - prioritizes working code over perfect code

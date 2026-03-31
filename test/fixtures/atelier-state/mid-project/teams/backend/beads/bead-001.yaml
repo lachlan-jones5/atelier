@@ -1,0 +1,24 @@
+id: bead-001
+title: "Add input validation to user creation endpoint"
+description: "The POST /api/users endpoint accepts any payload without validation. Add schema validation for required fields (name, email) and return 400 on invalid input."
+team: backend
+priority: medium
+status: done
+assigned_to: alex
+depends_on: []
+blocked_by: []
+acceptance_criteria:
+  - "POST /api/users returns 400 if name is missing"
+  - "POST /api/users returns 400 if email is invalid"
+  - "Valid requests still return 201"
+  - "Validation errors include descriptive messages"
+skill_targets:
+  - testing
+  - debugging
+type: feature
+files:
+  - src/routes/users.ts
+created_at: "2026-03-25T09:00:00.000Z"
+completed_at: "2026-03-26T11:00:00.000Z"
+review_feedback:
+  - "Good use of zod schemas. Consider extracting shared validators into a common module."

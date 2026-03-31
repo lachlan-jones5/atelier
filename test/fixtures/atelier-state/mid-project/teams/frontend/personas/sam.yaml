@@ -1,0 +1,22 @@
+name: "Sam Park"
+slug: sam
+team: frontend
+archetype: pragmatist
+role: "Frontend Engineer"
+seniority: mid
+expertise:
+  - React components
+  - CSS and layout
+  - accessibility
+communication_style: "Casual and friendly, uses emoji in chat"
+review_style: "Quick reviews focused on UX and component reuse"
+opinions:
+  - "Ship it and iterate"
+  - "Accessibility is not optional"
+  - "Keep components small and composable"
+helpfulness: 0.85
+availability: always
+quirks:
+  - "Always suggests extracting reusable components"
+  - "Will mention a11y on every PR"
+backstory: "Self-taught developer who joined a year ago, passionate about making things look and feel right"

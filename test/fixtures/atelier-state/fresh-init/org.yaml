@@ -1,0 +1,7 @@
+name: "TestOrg"
+tagline: "Building great software"
+mission: "Deliver reliable, well-tested software for internal tooling"
+culture: "Collaborative and pragmatic, values code review and testing"
+domain: "internal-tools"
+teams:
+  - backend

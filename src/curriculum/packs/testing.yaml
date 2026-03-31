@@ -1,0 +1,148 @@
+id: testing
+title: "Write Meaningful Tests"
+description: >
+  Move beyond basic assertions to write tests that catch real bugs,
+  document behavior, and give confidence to refactor. Covers unit
+  tests, integration tests, and edge case strategies.
+target_skills:
+  - testing
+  - reading_code
+  - design
+experience_level: apprentice
+estimated_hours: 10
+
+sequences:
+  - id: testing-unit
+    title: "Unit Tests"
+    description: >
+      Write focused unit tests that verify individual functions
+      in isolation with clear arrange-act-assert structure.
+    completion_criteria: "Core functions have unit tests with clear names and isolated dependencies"
+    bead_templates:
+      - id: test-unit-first
+        title: "Write your first unit tests"
+        description: >
+          Pick a pure function and write tests covering its main
+          behavior, including normal input and boundary values.
+        type: test
+        priority: high
+        acceptance_criteria:
+          - "Test names describe the expected behavior"
+          - "Each test follows arrange-act-assert pattern"
+          - "At least 3 test cases covering different inputs"
+        skill_targets:
+          - testing
+        hints:
+          - "Start with the simplest pure function you can find"
+          - "Name tests like: 'returns empty array when input is empty'"
+
+      - id: test-unit-mocking
+        title: "Test with dependencies"
+        description: >
+          Write unit tests for a function that depends on external
+          services by using mocks or stubs.
+        type: test
+        priority: medium
+        acceptance_criteria:
+          - "External dependencies are mocked, not called"
+          - "Mock behavior is verified (correct args, call count)"
+          - "Tests still pass if external service is down"
+        skill_targets:
+          - testing
+          - design
+        depends_on_template:
+          - test-unit-first
+
+  - id: testing-integration
+    title: "Integration Tests"
+    description: >
+      Write tests that verify multiple components working together,
+      including database interactions and API calls.
+    completion_criteria: "Key workflows have integration tests that run against real (local) dependencies"
+    bead_templates:
+      - id: test-int-setup
+        title: "Set up integration test infrastructure"
+        description: >
+          Create test helpers for setup/teardown of test databases,
+          server instances, or other shared resources.
+        type: infra
+        priority: high
+        acceptance_criteria:
+          - "Test database is created and destroyed per test suite"
+          - "Helpers are reusable across multiple test files"
+          - "Setup failures produce clear error messages"
+        skill_targets:
+          - testing
+          - design
+
+      - id: test-int-workflows
+        title: "Test end-to-end workflows"
+        description: >
+          Write integration tests for complete user workflows that
+          exercise multiple components together.
+        type: test
+        priority: high
+        acceptance_criteria:
+          - "At least 2 complete workflows are tested"
+          - "Tests verify the final state, not implementation details"
+          - "Tests clean up after themselves"
+        skill_targets:
+          - testing
+          - reading_code
+        depends_on_template:
+          - test-int-setup
+
+  - id: testing-edge-cases
+    title: "Edge Cases & Coverage"
+    description: >
+      Systematically identify and test edge cases, improve coverage
+      in critical paths, and learn when NOT to test.
+    completion_criteria: "Critical paths have edge case coverage and team agrees on testing boundaries"
+    bead_templates:
+      - id: test-edge-identify
+        title: "Map edge cases for a module"
+        description: >
+          Analyze a module and create an inventory of edge cases
+          including boundary values, error states, and race conditions.
+        type: docs
+        priority: medium
+        acceptance_criteria:
+          - "Edge case inventory covers at least 10 scenarios"
+          - "Each scenario has expected behavior documented"
+          - "Priority is assigned (must-test vs nice-to-have)"
+        skill_targets:
+          - reading_code
+          - testing
+
+      - id: test-edge-implement
+        title: "Implement edge case tests"
+        description: >
+          Write tests for the highest-priority edge cases identified
+          in the inventory.
+        type: test
+        priority: medium
+        acceptance_criteria:
+          - "Top 5 edge cases have tests"
+          - "Tests document WHY each edge case matters"
+          - "At least one test catches an actual bug"
+        skill_targets:
+          - testing
+        depends_on_template:
+          - test-edge-identify
+
+      - id: test-edge-boundaries
+        title: "Document testing boundaries"
+        description: >
+          Write a guide on what to test and what NOT to test in this
+          project, with rationale for the boundaries chosen.
+        type: docs
+        priority: low
+        acceptance_criteria:
+          - "Lists categories of things worth testing"
+          - "Lists things explicitly not worth testing, with rationale"
+          - "Includes examples from the actual codebase"
+        skill_targets:
+          - communication
+          - design
+        depends_on_template:
+          - test-edge-implement
