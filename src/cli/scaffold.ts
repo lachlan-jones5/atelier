@@ -11,9 +11,10 @@ const __dirname = dirname(__filename);
  * The scaffold bootstrap agent markdown content.
  * Guides Claude Code through project generation using the atelier_scaffold_generate tool.
  */
-function buildScaffoldAgent(mcpServerName: string): string {
+function buildScaffoldAgent(mcpServerName: string, atelierSrcIndex: string, projectRoot: string): string {
   return `---
-allowedTools:
+description: "Atelier scaffold wizard. Generates a new project from scratch with code, git history, and a fictional software organization."
+tools:
   - mcp__${mcpServerName}__atelier_scaffold_generate
   - mcp__${mcpServerName}__atelier_init_analyse
   - mcp__${mcpServerName}__atelier_init_generate_org
@@ -28,6 +29,13 @@ allowedTools:
   - Glob
   - Grep
   - Bash
+mcpServers:
+  ${mcpServerName}:
+    type: stdio
+    command: bun
+    args: ["run", "${atelierSrcIndex}"]
+    env:
+      ATELIER_PROJECT_ROOT: "${projectRoot}"
 ---
 
 # Atelier Scaffold Agent
@@ -122,7 +130,7 @@ Now run the standard init flow to populate the organization:
 Tell the user their scaffolded project is ready:
 
 > Scaffold complete! Your project has been generated with ${'{'}commitCount{'}'} commits of history and a full Atelier organization.
-> Switch to \`/agent atelier\` to start working with your team.
+> Switch to \`@"atelier"\` to start working with your team.
 
 ## Guidelines
 
@@ -189,6 +197,7 @@ export async function runScaffold(projectRoot: string): Promise<void> {
       experience_level: 'journeyman',
       flavor: '',
       progress: 0.0,
+      persona_model: 'claude-opus-4-6',
     };
     writeFileSync(configPath, stringify(defaultConfig), 'utf-8');
     console.log('  Created .atelier/config.yaml');
@@ -240,9 +249,9 @@ export async function runScaffold(projectRoot: string): Promise<void> {
     mkdirSync(agentsDir, { recursive: true });
   }
   const scaffoldAgentPath = join(agentsDir, 'atelier-scaffold.md');
-  writeFileSync(scaffoldAgentPath, buildScaffoldAgent('atelier'), 'utf-8');
+  writeFileSync(scaffoldAgentPath, buildScaffoldAgent('atelier', atelierSrcIndex, projectRoot), 'utf-8');
   console.log('  Created .claude/agents/atelier-scaffold.md (scaffold agent)');
 
   console.log();
-  console.log('Run /agent atelier-scaffold in Claude Code to generate your project');
+  console.log('Run @"atelier-scaffold" in Claude Code to generate your project');
 }

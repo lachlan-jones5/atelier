@@ -1,26 +1,32 @@
 ---
 name: atelier-review
-description: "{{org.name}} code review channel"
-model: claude-sonnet-4-6
-allowedTools:
-  - mcp__atelier__atelier_review_submit
-  - mcp__atelier__atelier_review_request
-  - mcp__atelier__atelier_review_feedback
-  - mcp__atelier__atelier_persona_get
-  - mcp__atelier__atelier_persona_list
-  - mcp__atelier__atelier_team_status
-  - mcp__atelier__atelier_team_list
-  - mcp__atelier__atelier_memory_recall
-  - mcp__atelier__atelier_memory_store
-  - mcp__atelier__atelier_bead_list
-  - mcp__atelier__atelier_bead_detail
-  - mcp__atelier__atelier_skill_summary
-  - mcp__atelier__atelier_skill_detail
-  - Agent
+description: "Code review channel for {{org.name}}. Submit code for multi-persona in-character review."
+model: {{personaModel}}
+tools:
   - Read
   - Grep
   - Glob
   - Bash
+  - mcp__atelier__atelier_persona_get
+  - mcp__atelier__atelier_persona_list
+  - mcp__atelier__atelier_memory_recall
+  - mcp__atelier__atelier_memory_store
+  - mcp__atelier__atelier_memory_search
+  - mcp__atelier__atelier_bead_list
+  - mcp__atelier__atelier_bead_detail
+  - mcp__atelier__atelier_team_list
+  - mcp__atelier__atelier_team_status
+  - mcp__atelier__atelier_review_submit
+  - mcp__atelier__atelier_review_request
+  - mcp__atelier__atelier_review_feedback
+  - mcp__atelier__atelier_skill_summary
+mcpServers:
+  atelier:
+    type: stdio
+    command: "{{mcpServerCommand}}"
+    args: {{mcpServerArgsJson}}
+    env:
+      ATELIER_PROJECT_ROOT: "{{projectRoot}}"
 ---
 
 # {{org.name}} — Code Review Channel

@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
 import { existsSync } from 'node:fs';
 import { mkdir, writeFile, unlink, readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { stringify } from 'yaml';
 import type { registerTool as RegisterToolFn } from './index.js';
 import { analyseCodebase } from '../analysis/index.js';
@@ -375,6 +376,18 @@ export function registerInitTools(register: typeof RegisterToolFn) {
           }
         }
 
+        // Read persona_model from config (default to claude-opus-4-6)
+        let personaModel = 'claude-opus-4-6';
+        try {
+          const configPath = join(ctx.atelierDir, 'config.yaml');
+          const config = await readYaml<{ persona_model?: string }>(configPath);
+          if (config.persona_model) {
+            personaModel = config.persona_model;
+          }
+        } catch {
+          // Config may not exist yet, use default
+        }
+
         // Generate agents
         const engine = new AgentTemplateEngine();
         const result = await engine.generateAll(ctx.projectRoot, {
@@ -382,6 +395,10 @@ export function registerInitTools(register: typeof RegisterToolFn) {
           allTeams,
           allPersonas,
           mcpServerName: 'atelier',
+          personaModel,
+          mcpServerCommand: 'bun',
+          mcpServerArgsJson: JSON.stringify(['run', join(dirname(fileURLToPath(import.meta.url)), '..', 'index.ts')]),
+          projectRoot: ctx.projectRoot,
         });
 
         // Delete bootstrap agent
@@ -470,7 +487,7 @@ export function registerInitTools(register: typeof RegisterToolFn) {
           })),
           totalPersonas,
           agentFiles: agentCount,
-          nextStep: 'Run /agent atelier to start working with your team.',
+          nextStep: 'Use @"persona-name" to talk to teammates, or @"atelier-review" for code review.',
         };
 
         return {

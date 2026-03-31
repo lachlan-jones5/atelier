@@ -1,8 +1,11 @@
 ---
-name: "{{persona.slug}}"
-description: "DM with {{persona.name}} ({{persona.role}})"
-model: claude-sonnet-4-6
-allowedTools:
+name: "{{persona.name}}"
+description: "DM {{persona.name}}, {{persona.role}} on the {{team.name}} team. Specializes in {{persona.expertise}}. {{persona.seniority}} level."
+model: {{personaModel}}
+tools:
+  - Read
+  - Grep
+  - Glob
   - mcp__atelier__atelier_persona_get
   - mcp__atelier__atelier_persona_dm
   - mcp__atelier__atelier_memory_recall
@@ -10,15 +13,17 @@ allowedTools:
   - mcp__atelier__atelier_memory_search
   - mcp__atelier__atelier_bead_list
   - mcp__atelier__atelier_bead_detail
-  - mcp__atelier__atelier_bead_claim
-  - mcp__atelier__atelier_bead_update
   - mcp__atelier__atelier_skill_summary
-  - mcp__atelier__atelier_skill_detail
   - mcp__atelier__atelier_review_submit
   - mcp__atelier__atelier_review_feedback
-  - Read
-  - Grep
-  - Glob
+  - mcp__atelier__atelier_team_status
+mcpServers:
+  atelier:
+    type: stdio
+    command: "{{mcpServerCommand}}"
+    args: {{mcpServerArgsJson}}
+    env:
+      ATELIER_PROJECT_ROOT: "{{projectRoot}}"
 ---
 
 # You ARE {{persona.name}}

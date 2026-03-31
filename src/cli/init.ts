@@ -12,9 +12,10 @@ const __dirname = dirname(__filename);
  * This agent guides the user through interactive Atelier setup
  * and is deleted once agent generation is complete.
  */
-function buildBootstrapAgent(mcpServerName: string): string {
+function buildBootstrapAgent(mcpServerName: string, atelierSrcIndex: string, projectRoot: string): string {
   return `---
-allowedTools:
+description: "Atelier initialization wizard. Guides you through setting up your simulated engineering organization."
+tools:
   - mcp__${mcpServerName}__atelier_init_analyse
   - mcp__${mcpServerName}__atelier_init_generate_org
   - mcp__${mcpServerName}__atelier_init_save_org
@@ -25,6 +26,13 @@ allowedTools:
   - Read
   - Glob
   - Grep
+mcpServers:
+  ${mcpServerName}:
+    type: stdio
+    command: bun
+    args: ["run", "${atelierSrcIndex}"]
+    env:
+      ATELIER_PROJECT_ROOT: "${projectRoot}"
 ---
 
 # Atelier Init Agent
@@ -126,7 +134,7 @@ atelier_init_finalize({})
 
 Tell the user setup is complete and they should switch to the main Atelier agent:
 
-> Setup complete! Your organization is ready. Switch to \`/agent atelier\` to start working with your team.
+> Setup complete! Your organization is ready. Switch to \`@"atelier"\` to start working with your team.
 
 ## Guidelines
 
@@ -183,6 +191,7 @@ export async function runInit(projectRoot: string): Promise<void> {
       experience_level: 'journeyman',
       flavor: '',
       progress: 0.0,
+      persona_model: 'claude-opus-4-6',
     };
     writeFileSync(configPath, stringify(defaultConfig), 'utf-8');
     console.log('  Created .atelier/config.yaml');
@@ -238,9 +247,9 @@ export async function runInit(projectRoot: string): Promise<void> {
     mkdirSync(agentsDir, { recursive: true });
   }
   const bootstrapPath = join(agentsDir, 'atelier-init.md');
-  writeFileSync(bootstrapPath, buildBootstrapAgent('atelier'), 'utf-8');
+  writeFileSync(bootstrapPath, buildBootstrapAgent('atelier', atelierSrcIndex, projectRoot), 'utf-8');
   console.log('  Created .claude/agents/atelier-init.md (bootstrap agent)');
 
   console.log();
-  console.log('Setup started. Run /agent atelier-init in Claude Code to complete initialization.');
+  console.log('Setup started. Run @"atelier-init" in Claude Code to complete initialization.');
 }

@@ -52,6 +52,7 @@ describe('init flow', () => {
     expect(config.experience_level).toBe('journeyman');
     expect(config.flavor).toBe('');
     expect(config.progress).toBe(0.0);
+    expect(config.persona_model).toBe('claude-opus-4-6');
   });
 
   it('writes state.json', async () => {
@@ -112,7 +113,8 @@ describe('init flow', () => {
     const content = await readFile(agentPath, 'utf-8');
     expect(content).toContain('Atelier Init Agent');
     expect(content).toContain('atelier_init_analyse');
-    expect(content).toContain('allowedTools');
+    expect(content).toContain('tools:');
+    expect(content).not.toContain('allowedTools');
   });
 
   it('does not overwrite existing config on re-init', async () => {

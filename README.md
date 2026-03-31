@@ -10,7 +10,7 @@ There is a growing gap between "can write code" and "can operate as a software e
 
 - **Organization model** — A generated company with teams, cross-team dependencies, and a living codebase. Your teammates have branches in flight, opinions about architecture, and work that interacts with yours.
 - **Dynamic team generation** — Teams are assembled from behavioral archetypes and customized to your project's domain. Each teammate has a name, role, expertise, communication style, and opinions — all generated to fit your codebase.
-- **Multi-agent architecture** — Each teammate is a dedicated Claude Code agent. Talk to the whole team in group chat, DM individual teammates, or coordinate across teams through an org hub.
+- **Flat agent architecture** — Each teammate is a dedicated Claude Code subagent invoked directly from your session. Your CLAUDE.md context makes the session aware of the full team — talk to anyone with `@"persona-name"`.
 - **Persona archetypes** — 10 built-in archetypes (The Mentor, The Gatekeeper, The Pragmatist, and more) that define how teammates think, communicate, and review code.
 - **Beads (work units)** — Scoped, dependency-aware tasks assigned like real engineering work. Deliberately incomplete, just like real tickets — you'll need to explore the codebase and ask questions.
 - **Code review** — Submit your branch for review and receive substantive, contextual feedback from teammates who read your actual diff and respond in character.
@@ -35,84 +35,81 @@ bunx atelier init
 bunx atelier scaffold
 ```
 
-`atelier init` analyzes your repository (language, framework, structure, tests, build system), generates an `.atelier/` directory with your organization, teams, personas, and bead backlog, then creates Claude Code agent files in `.claude/agents/`.
+`atelier init` analyzes your repository (language, framework, structure, tests, build system), generates an `.atelier/` directory with your organization, teams, personas, and bead backlog, then installs CLAUDE.md context and agent frontmatter files into `.claude/`.
 
-Once initialized, interact with your team through Claude Code's `/agent` command:
+Once initialized, open Claude Code. Your CLAUDE.md context makes the session aware of the team — every persona is available as a direct subagent:
 
 ```
-> /agent backend
+You: @"Marcus Chen" Hey Marcus, I'm picking up the rate limiting bead.
+     What's the current state of the public API endpoints?
 
-[Backend Team Chat]
-Good morning! The team is online.
+[Marcus Chen — Tech Lead] Good timing. Aisha just landed the auth
+middleware refactor on her branch, so the request pipeline is clean.
+The public endpoints are in src/api/routes/public/ — no rate limiting
+at all right now. I'd start by looking at how we handle middleware
+chaining in the auth layer and follow that pattern.
 
-[Marcus — Tech Lead] Hey! We've got a few things in flight today.
-Aisha is finishing up the auth middleware refactor on her branch.
-I've pulled in a new feature request — we need to add rate limiting
-to the public API endpoints.
+[Marcus Chen] I've got opinions about token bucket vs sliding window
+if you want to talk through the trade-offs.
 
-[Marcus] @you — I've got a bead for you. Take a look.
+You: @"Aisha Patel" Aisha, can I see how the auth middleware hooks in?
+     I want to follow the same pattern for rate limiting.
+
+[Aisha Patel — Senior Engineer] Sure! Check out src/middleware/auth.ts,
+specifically the `createAuthChain()` factory. The pattern is...
 ```
 
 ## Architecture
 
-Atelier uses a multi-agent architecture where each teammate is a real Claude Code agent with its own persistent memory:
+Atelier uses a flat agent architecture where your Claude Code session is the orchestrator and each teammate is a direct subagent:
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                 Claude Code Session                  │
+┌──────────────────────────────────────────────────────┐
+│              Your Claude Code Session                 │
+│           (CLAUDE.md team context loaded)             │
 │                                                      │
-│  ┌──────────────────────────────────────────────┐    │
-│  │            /agent atelier (Org Hub)           │    │
-│  │  Cross-team status, curriculum, incidents     │    │
-│  └──────────────┬───────────────────────────────┘    │
-│                 │                                     │
-│  ┌──────────────▼───────────────────────────────┐    │
-│  │         /agent <team> (Team Orchestrator)     │    │
-│  │  Group chat — spawns sub-agents per persona   │    │
-│  └──┬──────────┬──────────┬─────────────────────┘    │
-│     │          │          │                          │
-│  ┌──▼───┐  ┌──▼───┐  ┌──▼───┐                      │
-│  │Marcus│  │Aisha │  │Jordan│  ← Sub-agents         │
-│  └──────┘  └──────┘  └──────┘    (ephemeral but     │
-│                                   memory-persistent)  │
-│  ┌──────────────────────────────────────────────┐    │
-│  │     /agent <name> (Direct Messages)           │    │
-│  │  1:1 conversation with any teammate           │    │
-│  └──────────────────────────────────────────────┘    │
-│                                                      │
-│  ┌──────────────────────────────────────────────┐    │
-│  │     /agent atelier-review (Review Channel)    │    │
-│  │  Cross-team code review workflow              │    │
-│  └──────────────────────────────────────────────┘    │
-│                     │                                │
-│              ┌──────▼──────┐                         │
-│              │ Atelier MCP │  ← State machine &      │
-│              │   Server    │    context provider      │
-│              └──────┬──────┘                         │
-└─────────────────────┼───────────────────────────────┘
-                      │
-               ┌──────▼──────┐
-               │  .atelier/  │
-               │  org.yaml   │
-               │  teams/     │
-               │  beads/     │
-               │  memory/    │
-               │  history/   │
-               └─────────────┘
+│  ┌────────────┐ ┌────────────┐ ┌────────────┐       │
+│  │ @"Marcus   │ │ @"Aisha    │ │ @"Jordan   │  ...  │
+│  │  Chen"     │ │  Patel"    │ │  Kim"      │       │
+│  │ (Tech Lead)│ │ (Senior)   │ │ (Junior)   │       │
+│  └─────┬──────┘ └─────┬──────┘ └─────┬──────┘       │
+│        │               │              │              │
+│  ┌─────┴───────────────┴──────────────┴──────┐       │
+│  │          @"atelier-review"                │       │
+│  │     Cross-team code review workflow       │       │
+│  └───────────────────┬───────────────────────┘       │
+│                      │                               │
+│              ┌───────▼───────┐                       │
+│              │  Atelier MCP  │  ← State machine &    │
+│              │    Server     │    context provider    │
+│              └───────┬───────┘                       │
+└──────────────────────┼───────────────────────────────┘
+                       │
+                ┌──────▼──────┐
+                │  .atelier/  │
+                │  org.yaml   │
+                │  teams/     │
+                │  beads/     │
+                │  memory/    │
+                │  history/   │
+                └─────────────┘
 ```
 
-The MCP server is **agent-gated** — it's not exposed to your normal Claude Code session. Tools are only accessible through the generated agent files in `.claude/agents/`, each with an `allowedTools` whitelist restricting access to `mcp__atelier__*` tools.
+Each character agent gets access to the Atelier MCP server via inline `mcpServers` configuration in its agent frontmatter. The main session also has access via `.mcp.json` in the project root. This means every agent — whether a persona subagent or your top-level session — can read organization state, query beads, and update memory through the same MCP tools.
+
+Character agents use `claude-opus-4-6` by default for maximum character depth and consistency. This is configurable via `persona_model` in `config.yaml`.
 
 No separate API calls or costs beyond your Claude Code subscription. Every interaction runs through the same session. Agent quality scales with Claude's capability.
 
 ## Agent Channels
 
-| Channel | Command | Description |
+| Channel | How | Description |
 |---|---|---|
-| Org hub | `/agent atelier` | Organization-wide status, cross-team activity, curriculum, incidents |
-| Team chat | `/agent <team>` | Your team's group chat — ask questions, get updates, coordinate |
-| Direct message | `/agent <name>` | DM a specific teammate for focused 1:1 discussion |
-| Code review | `/agent atelier-review` | Submit work for review or review a teammate's branch |
+| Direct message | `@"persona-name"` | DM any teammate for focused 1:1 discussion |
+| Code review | `@"atelier-review"` | Submit work for review or review a teammate's branch |
+| Team input | Ask the main session | "What does the team think about X?" — the session delegates to relevant personas |
+
+The main session's CLAUDE.md context contains the full team roster, roles, and expertise areas, so it knows which personas to consult for any given question. There is no separate "org hub" or "team chat" agent — your session handles orchestration directly.
 
 ## Archetypes
 
@@ -220,7 +217,7 @@ All state lives in `.atelier/` within your repository (add to `.gitignore` — i
 
 ```
 .atelier/
-├── config.yaml              # experience_level, flavor, progress
+├── config.yaml              # experience_level, flavor, progress, persona_model
 ├── org.yaml                 # Organization: name, mission, culture, teams
 ├── archetypes.yaml          # Archetype configuration
 ├── state.json               # Session state
@@ -234,6 +231,14 @@ All state lives in `.atelier/` within your repository (add to `.gitignore` — i
 ├── curriculum/active.yaml   # Active curriculum pack state
 ├── incidents/active.yaml    # Active incident state
 └── history/chat.jsonl       # Full chat history
+```
+
+```yaml
+# config.yaml
+experience_level: journeyman
+progress: 30
+flavor: "grumpy Unix wizards"
+persona_model: claude-opus-4-6   # Model for character agents (default: claude-opus-4-6)
 ```
 
 ## Development

@@ -1,4 +1,4 @@
-import { readdir, readFile, mkdir, writeFile } from 'node:fs/promises';
+import { readdir, readFile, mkdir, writeFile, unlink, access } from 'node:fs/promises';
 import { join, basename, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Organization } from '../core/organization.js';
@@ -12,6 +12,10 @@ export interface AgentTemplateContext {
   allTeams: Team[];
   allPersonas: Persona[];
   mcpServerName: string; // "atelier"
+  personaModel: string; // e.g., "claude-opus-4-6"
+  mcpServerCommand: string; // e.g., "bun"
+  mcpServerArgsJson: string; // Pre-serialized JSON array, e.g., '["run", "/path/to/src/index.ts"]'
+  projectRoot: string; // Absolute path to the project root
   // Computed fields added during rendering
   teamPersonas?: Persona[];
   otherTeams?: Team[];
@@ -66,7 +70,8 @@ export class AgentTemplateEngine {
         `Template "${templateName}" not found. Available: ${available}`,
       );
     }
-    return renderTemplate(template, context as unknown as Record<string, unknown>);
+    const rendered = renderTemplate(template, context as unknown as Record<string, unknown>);
+    return escapeYamlFrontmatter(rendered);
   }
 
   /** Generate all agent files for the project. */
@@ -81,29 +86,27 @@ export class AgentTemplateEngine {
 
     const generated: string[] = [];
 
-    // 1. Org orchestrator -> .claude/agents/atelier.md
-    const orgContent = this.render('org-orchestrator', context);
-    const orgPath = join(agentsDir, 'atelier.md');
-    await writeFile(orgPath, orgContent, 'utf-8');
-    generated.push(orgPath);
-
-    // 2. Per-team orchestrators -> .claude/agents/<team-slug>.md
-    for (const team of context.allTeams) {
-      const teamPersonas = context.allPersonas.filter((p) => p.team === team.slug);
-      const otherTeams = context.allTeams.filter((t) => t.slug !== team.slug);
-      const teamContext: AgentTemplateContext = {
-        ...context,
-        team,
-        teamPersonas,
-        otherTeams,
-      };
-      const teamContent = this.render('team-orchestrator', teamContext);
-      const teamPath = join(agentsDir, `${team.slug}.md`);
-      await writeFile(teamPath, teamContent, 'utf-8');
-      generated.push(teamPath);
+    // 0. Clean up old orchestrator files (before persona generation,
+    //    so that a persona slug matching a team slug isn't deleted)
+    const oldOrgPath = join(agentsDir, 'atelier.md');
+    try {
+      await access(oldOrgPath);
+      await unlink(oldOrgPath);
+    } catch {
+      // Doesn't exist, nothing to clean up
     }
 
-    // 3. Per-persona DM agents -> .claude/agents/<persona-slug>.md
+    for (const team of context.allTeams) {
+      const oldTeamPath = join(agentsDir, `${team.slug}.md`);
+      try {
+        await access(oldTeamPath);
+        await unlink(oldTeamPath);
+      } catch {
+        // Doesn't exist, nothing to clean up
+      }
+    }
+
+    // 1. Per-persona DM agents -> .claude/agents/<persona-slug>.md
     for (const persona of context.allPersonas) {
       const team = context.allTeams.find((t) => t.slug === persona.team);
       if (!team) continue;
@@ -118,19 +121,52 @@ export class AgentTemplateEngine {
       generated.push(personaPath);
     }
 
-    // 4. Review agent -> .claude/agents/atelier-review.md
+    // 2. Review agent -> .claude/agents/atelier-review.md
     const reviewContent = this.render('review-agent', context);
     const reviewPath = join(agentsDir, 'atelier-review.md');
     await writeFile(reviewPath, reviewContent, 'utf-8');
     generated.push(reviewPath);
 
+    // 3. Generate/update .claude/CLAUDE.md with session-context
+    const claudeDir = join(projectRoot, '.claude');
+    await mkdir(claudeDir, { recursive: true });
+    const claudeMdPath = join(claudeDir, 'CLAUDE.md');
+    const sessionContent = this.render('session-context', context);
+    const BEGIN_MARKER = '<!-- BEGIN ATELIER CONTEXT -->';
+    const END_MARKER = '<!-- END ATELIER CONTEXT -->';
+
+    let existingContent: string | null = null;
+    try {
+      existingContent = await readFile(claudeMdPath, 'utf-8');
+    } catch {
+      // File doesn't exist
+    }
+
+    let finalContent: string;
+    if (existingContent !== null) {
+      const beginIdx = existingContent.indexOf(BEGIN_MARKER);
+      const endIdx = existingContent.indexOf(END_MARKER);
+      if (beginIdx !== -1 && endIdx !== -1 && beginIdx < endIdx) {
+        // Replace everything between BEGIN and END markers (inclusive)
+        finalContent =
+          existingContent.slice(0, beginIdx) +
+          sessionContent.trimEnd() +
+          existingContent.slice(endIdx + END_MARKER.length);
+      } else {
+        // Append after existing content
+        finalContent = existingContent.trimEnd() + '\n\n' + sessionContent;
+      }
+    } else {
+      // Create new file with just the session-context content
+      finalContent = sessionContent;
+    }
+
+    await writeFile(claudeMdPath, finalContent, 'utf-8');
+    generated.push(claudeMdPath);
+
     return { generated, agentsDir };
   }
 
-  /** Render the sub-agent prompt template with inline context (not written to file). */
-  renderSubAgentPrompt(context: AgentTemplateContext): string {
-    return this.render('sub-agent-prompt', context);
-  }
 }
 
 export interface GenerationResult {
@@ -380,4 +416,42 @@ function isTruthy(value: unknown): boolean {
   if (typeof value === 'number') return value !== 0;
   if (Array.isArray(value)) return value.length > 0;
   return true;
+}
+
+/**
+ * Escape double quotes inside double-quoted YAML values in frontmatter.
+ *
+ * YAML frontmatter is delimited by leading `---` lines. Within that region,
+ * lines matching `key: "value"` may contain unescaped interior double quotes
+ * (e.g., a persona name like `Sarah "Sal" Johnson`). This function finds
+ * such lines and backslash-escapes the interior quotes.
+ *
+ * Only the frontmatter section (between the first two `---` lines) is touched;
+ * the rest of the document is returned unchanged.
+ */
+function escapeYamlFrontmatter(rendered: string): string {
+  // Quick check: does it start with frontmatter?
+  if (!rendered.startsWith('---')) return rendered;
+
+  const endIdx = rendered.indexOf('\n---', 3);
+  if (endIdx === -1) return rendered;
+
+  // Include the closing ---\n
+  const frontmatterEnd = endIdx + 4; // '\n---'.length
+  const frontmatter = rendered.slice(0, frontmatterEnd);
+  const rest = rendered.slice(frontmatterEnd);
+
+  // Process each line in the frontmatter
+  const escapedFrontmatter = frontmatter.replace(
+    /^(\s*\w[\w\s]*:\s*)"(.+)"(\s*)$/gm,
+    (_match, prefix: string, inner: string, suffix: string) => {
+      // Escape backslashes first, then double quotes that aren't already escaped
+      const escaped = inner
+        .replace(/\\(?!")/g, '\\\\')    // escape lone backslashes
+        .replace(/(?<!\\)"/g, '\\"');    // escape unescaped double quotes
+      return `${prefix}"${escaped}"${suffix}`;
+    },
+  );
+
+  return escapedFrontmatter + rest;
 }
